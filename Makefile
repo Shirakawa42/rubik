@@ -2,7 +2,7 @@
 
 NAME = rubik
 
-SRC_NAME = rubik.cpp Cube.cpp Parser.cpp
+SRC_NAME = rubik.cpp Cube.cpp Parser.cpp Solver.cpp
 OBJ_NAME = $(SRC_NAME:.cpp=.o)
 
 SRC_PATH = src/

@@ -7,5 +7,5 @@ class Parser
 	public:
 		Parser();
 		~Parser();
-		void	Parse(char *str, Cube & cube);
+		void	Parse(char const *str, Cube & cube);
 };

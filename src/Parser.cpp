@@ -23,7 +23,7 @@ static std::string	removeWrong(std::string str)
 	return ret;
 }
 
-void	Parser::Parse(char *str, Cube & cube)
+void	Parser::Parse(char const *str, Cube & cube)
 {
 	std::string	s = std::string(str);
 	std::string		ok = "RLUDFB";
