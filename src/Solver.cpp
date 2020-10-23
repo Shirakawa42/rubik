@@ -14,6 +14,9 @@ void	Solver::solve(Cube & cube)
 {
 	cube.reset_moves();
 	create_blue_face(cube);
+	std::cout << "\n====================\n" << std::endl;
+	cube.print_cube();
+	create_second_line(cube);
 }
 
 void	Solver::set_facing(int face)
@@ -84,7 +87,7 @@ static bool	is_arete_opposite(int i, int j, int k)
 	return false;
 }
 
-static void	get_down(int facing, int & j, int & k)
+static int	get_down(Cube & cube, int facing, int & j, int & k)
 {
 	if (facing == 0)
 	{
@@ -105,6 +108,31 @@ static void	get_down(int facing, int & j, int & k)
 	{
 		j = 2;
 		k = 1;
+	}
+	return cube.get_value(facing, j, k);
+}
+
+static void	get_target_belge(int facing, int & j, int & k)
+{
+	if (facing == 0)
+	{
+		j = 1;
+		k = 0;
+	}
+	else if (facing == 1)
+	{
+		j = 2;
+		k = 1;
+	}
+	else if (facing == 3)
+	{
+		j = 0;
+		k = 1;
+	}
+	else if (facing == 5)
+	{
+		j = 1;
+		k = 2;
 	}
 }
 
@@ -247,7 +275,7 @@ void	Solver::place_arete(Cube & cube, int i, int j, int k, int facing, int value
 	}
 	if (is_arete_opposite(i, j, k))
 	{
-		get_down(facing, nj, nk);
+		get_down(cube, facing, nj, nk);
 		while (cube.get_value(facing, nj, nk) != value)
 			cube.move('B', false, 1);
 		parser.Parse((D+R+L+"'"+F+"'"+R+"'"+L).c_str(), cube);
@@ -331,6 +359,27 @@ static void	get_down_corner(int i, int & nj, int & nk, bool right)
 	}
 }
 
+static bool	is_on_another_corner_belge(Cube & cube, int facing, int value, int opposite, int i)
+{
+	int	j, k, v;
+
+	if (i == 4)
+		return false;
+	v = get_down(cube, 5, j, k);
+	if (v == opposite || v == value)
+		return false;
+	v = get_down(cube, 3, j, k);
+	if (v == opposite || v == value)
+		return false;
+	v = get_down(cube, 0, j, k);
+	if (v == opposite || v == value)
+		return false;
+	v = get_down(cube, 1, j, k);
+	if (v == opposite || v == value)
+		return false;
+	return true;
+}
+
 void	Solver::place_corner(Cube & cube, int i, int j, int k, int facing, int value)
 {
 	int	nj, nk, njL, nkL;
@@ -376,6 +425,63 @@ void	Solver::place_corner(Cube & cube, int i, int j, int k, int facing, int valu
 		parser.Parse((D+D+F+D+"'"+F+"'").c_str(), cube);
 }
 
+void	Solver::place_belge(Cube & cube, int i, int j, int k, int facing, int value, int opposite)
+{
+	int	nj, nk, r, tj, tk;
+
+	if (is_on_another_corner_belge(cube, facing, value, opposite, i))
+	{
+		std::cout << "test1" << std::endl;
+		get_target_belge(i, tj, tk);
+		std::cout << i << std::endl;
+		if (cube.get_value(i, tj, tk) == value || cube.get_value(i, tj, tk) == opposite)
+		{
+			std::cout << "testcrash2" << std::endl;
+			set_facing(i);
+			parser.Parse((R+"'"+D+R+D+F+D+"'"+F+"'").c_str(), cube);
+			std::cout << "test2" << std::endl;
+		}
+		else
+		{
+			std::cout << "testcrash2" << std::endl;
+			int	oi, oj, ok;
+			cube.find_value(opposite, oi, oj, ok);
+			set_facing(oi);
+			parser.Parse((R+"'"+D+R+D+F+D+"'"+F+"'").c_str(), cube);
+			std::cout << "test3" << std::endl;
+		}
+	}
+	set_facing(facing);
+	get_target_belge(facing, tj, tk);
+	std::cout << cube.get_value(facing, tj, tk) << " tj = " << tj << " tk = " << tk << std::endl;
+	if (cube.get_value(facing, tj, tk) != opposite)
+	{
+		std::cout << "test4" << std::endl;
+		for (int i = 0; i < 4 && (r = get_down(cube, facing, nj, nk)) != value && r != opposite; i++)
+		{
+			std::cout << "test5" << std::endl;
+			cube.move('B', false, 1);
+		}
+		if (r == value)
+		{
+			std::cout << "test6" << std::endl;
+			parser.Parse((D+"'"+R+"'"+D+R+D+F+D+"'"+F+"'").c_str(), cube);
+		}
+		else
+		{
+			std::cout << "test7" << std::endl;
+			std::cout << "\n====================\n" << std::endl;
+			cube.print_cube();
+			parser.Parse((D+D+F+D+"'"+F+"'"+D+"'"+R+"'"+D+R).c_str(), cube);
+		}
+	}
+	else
+	{
+		std::cout << "test8" << std::endl;
+		parser.Parse((D+"'"+R+"'"+D+R+D+F+D+"'"+F+"'"+D+R+"'"+D+R+D+F+D+"'"+F+"'").c_str(), cube);
+	}
+}
+
 void	Solver::create_blue_face(Cube & cube)
 {
 	int				i, j, k;
@@ -405,4 +511,22 @@ void	Solver::create_blue_face(Cube & cube)
 	cube.find_value(26, i, j, k);
 	if (!(i == 2 && j == 2 && k == 2))
 		place_corner(cube, i, j, k, 5, 26);
+}
+
+void	Solver::create_second_line(Cube & cube)
+{
+	int		i, j, k;
+
+	cube.find_value(28, i, j, k);
+	if (!(i == 3 && j == 0 && k == 1))
+		place_belge(cube, i, j, k, 3, 28, 5);
+	cube.find_value(3, i, j, k);
+	if (!(i == 0 && j == 1 && k == 0))
+		place_belge(cube, i, j, k, 0, 3, 10);
+	cube.find_value(16, i, j, k);
+	if (!(i == 1 && j == 2 && k == 1))
+		place_belge(cube, i, j, k, 1, 16, 48);
+	cube.find_value(50, i, j, k);
+	if (!(i == 5 && j == 1 && k == 2))
+		place_belge(cube, i, j, k, 5, 50, 34);
 }
