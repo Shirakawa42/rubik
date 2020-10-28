@@ -14,9 +14,11 @@ void	Solver::solve(Cube & cube)
 {
 	cube.reset_moves();
 	create_blue_face(cube);
-	std::cout << "\n====================\n" << std::endl;
-	cube.print_cube();
 	create_second_line(cube);
+	create_cross(cube);
+	place_cross(cube);
+	place_last_corners(cube);
+	rotate_corners(cube);
 }
 
 void	Solver::set_facing(int face)
@@ -431,49 +433,30 @@ void	Solver::place_belge(Cube & cube, int i, int j, int k, int facing, int value
 
 	if (is_on_another_corner_belge(cube, facing, value, opposite, i))
 	{
-		std::cout << "test1" << std::endl;
 		get_target_belge(i, tj, tk);
-		std::cout << i << std::endl;
 		if (cube.get_value(i, tj, tk) == value || cube.get_value(i, tj, tk) == opposite)
 		{
-			std::cout << "testcrash2" << std::endl;
 			set_facing(i);
 			parser.Parse((R+"'"+D+R+D+F+D+"'"+F+"'").c_str(), cube);
-			std::cout << "test2" << std::endl;
 		}
 		else
 		{
-			std::cout << "testcrash2" << std::endl;
 			int	oi, oj, ok;
 			cube.find_value(opposite, oi, oj, ok);
 			set_facing(oi);
 			parser.Parse((R+"'"+D+R+D+F+D+"'"+F+"'").c_str(), cube);
-			std::cout << "test3" << std::endl;
 		}
 	}
 	set_facing(facing);
 	get_target_belge(facing, tj, tk);
-	std::cout << cube.get_value(facing, tj, tk) << " tj = " << tj << " tk = " << tk << std::endl;
 	if (cube.get_value(facing, tj, tk) != opposite)
 	{
-		std::cout << "test4" << std::endl;
 		for (int i = 0; i < 4 && (r = get_down(cube, facing, nj, nk)) != value && r != opposite; i++)
-		{
-			std::cout << "test5" << std::endl;
 			cube.move('B', false, 1);
-		}
 		if (r == value)
-		{
-			std::cout << "test6" << std::endl;
 			parser.Parse((D+"'"+R+"'"+D+R+D+F+D+"'"+F+"'").c_str(), cube);
-		}
 		else
-		{
-			std::cout << "test7" << std::endl;
-			std::cout << "\n====================\n" << std::endl;
-			cube.print_cube();
 			parser.Parse((D+D+F+D+"'"+F+"'"+D+"'"+R+"'"+D+R).c_str(), cube);
-		}
 	}
 	else
 	{
@@ -529,4 +512,165 @@ void	Solver::create_second_line(Cube & cube)
 	cube.find_value(50, i, j, k);
 	if (!(i == 5 && j == 1 && k == 2))
 		place_belge(cube, i, j, k, 5, 50, 34);
+}
+
+static bool	is_green(int value)
+{
+	if (value >= 36 && value <= 45)
+		return true;
+	return false;
+}
+
+static int	is_cross_virgule(Cube & cube)
+{
+	if (is_green(cube.get_value(4, 1, 0))
+		&& is_green(cube.get_value(4, 0, 1)))
+		return 5;
+	if (is_green(cube.get_value(4, 0, 1))
+		&& is_green(cube.get_value(4, 1, 2)))
+		return 3;
+	if (is_green(cube.get_value(4, 1, 2))
+		&& is_green(cube.get_value(4, 2, 1)))
+		return 0;
+	if (is_green(cube.get_value(4, 1, 0))
+		&& is_green(cube.get_value(4, 2, 1)))
+		return 1;
+	return 3;
+}
+
+static int	is_cross_line(Cube & cube)
+{
+	if (is_green(cube.get_value(4, 0, 1))
+		&& is_green(cube.get_value(4, 2, 1)))
+		return 3;
+	if (is_green(cube.get_value(4, 1, 0))
+		&& is_green(cube.get_value(4, 1, 2)))
+		return 5;
+	return is_cross_virgule(cube);
+}
+
+static bool	is_cross(Cube & cube)
+{
+	if (is_green(cube.get_value(4, 0, 1))
+		&& is_green(cube.get_value(4, 1, 1))
+		&& is_green(cube.get_value(4, 2, 1))
+		&& is_green(cube.get_value(4, 1, 0))
+		&& is_green(cube.get_value(4, 1, 1))
+		&& is_green(cube.get_value(4, 1, 2)))
+		return true;
+	return false;
+}
+
+void	Solver::create_cross(Cube & cube)
+{
+	int	res;
+
+	while (!is_cross(cube))
+	{
+		set_facing(is_cross_line(cube));
+		parser.Parse((F+L+D+L+"'"+D+"'"+F+"'").c_str(), cube);
+	}	
+}
+
+void	Solver::place_cross(Cube & cube)
+{
+	if (cube.get_value(4, 0, 1) != 37)
+	{
+		if (cube.get_value(4, 1, 0) == 37)
+			cube.move('B', false, 1);
+		else if (cube.get_value(4, 1, 2) == 37)
+			cube.move('B', true, 1);
+		else
+		{
+			cube.move('B', true, 1);
+			cube.move('B', true, 1);
+		}
+	}
+	if (cube.get_value(4, 1, 0) != 39)
+	{
+		if (cube.get_value(4, 2, 1) == 39)
+		{
+			set_facing(5);
+			parser.Parse((L+D+L+"'"+D+L+D+D+L+"'"+D).c_str(), cube);
+		}
+		else
+		{
+			set_facing(1);
+			parser.Parse((L+D+L+"'"+D+L+D+D+L+"'"+D).c_str(), cube);
+			set_facing(5);
+			parser.Parse((L+D+L+"'"+D+L+D+D+L+"'"+D).c_str(), cube);
+		}
+	}
+	if (cube.get_value(4, 1, 2) != 41)
+	{
+		set_facing(1);
+		parser.Parse((L+D+L+"'"+D+L+D+D+L+"'"+D).c_str(), cube);
+	}
+}
+
+static bool	are_well_placed_last_corners(Cube & cube)
+{
+	int	val;
+
+	if (((val = cube.get_value(4, 0, 0)) == 36 || val == 29 || val == 2)
+		&& ((val = cube.get_value(4, 0, 2)) == 38 || val == 9 || val == 0)
+		&& ((val = cube.get_value(4, 2, 0)) == 42 || val == 53 || val == 35)
+		&& ((val = cube.get_value(4, 2, 2)) == 44 || val == 15 || val == 51))
+		return true;
+	return false;
+}
+
+void	Solver::place_last_corners(Cube & cube)
+{
+	int	val;
+
+	if (are_well_placed_last_corners(cube))
+		return ;
+	if ((val = cube.get_value(4, 0, 0)) == 36 || val == 29 || val == 2)
+	{
+		set_facing(0);
+		while (!are_well_placed_last_corners(cube))
+			parser.Parse((D+L+D+"'"+R+"'"+D+L+"'"+D+"'"+R).c_str(), cube);
+	}
+	else if ((val = cube.get_value(4, 0, 2)) == 38 || val == 9 || val == 0)
+	{
+		set_facing(1);
+		while (!are_well_placed_last_corners(cube))
+			parser.Parse((D+L+D+"'"+R+"'"+D+L+"'"+D+"'"+R).c_str(), cube);
+	}
+	else if ((val = cube.get_value(4, 2, 0)) == 42 || val == 53 || val == 35)
+	{
+		set_facing(3);
+		while (!are_well_placed_last_corners(cube))
+			parser.Parse((D+L+D+"'"+R+"'"+D+L+"'"+D+"'"+R).c_str(), cube);
+	}
+	else if ((val = cube.get_value(4, 2, 2)) == 44 || val == 15 || val == 51)
+	{
+		set_facing(5);
+		while (!are_well_placed_last_corners(cube))
+			parser.Parse((D+L+D+"'"+R+"'"+D+L+"'"+D+"'"+R).c_str(), cube);
+	}
+	else
+	{
+		set_facing(5);
+		parser.Parse((D+L+D+"'"+R+"'"+D+L+"'"+D+"'"+R).c_str(), cube);
+		place_last_corners(cube);
+	}
+}
+
+void	Solver::rotate_corners(Cube & cube)
+{
+	set_facing(5);
+	while (cube.get_value(4, 2, 2) != 44)
+		parser.Parse((L+"'"+U+"'"+L+U).c_str(), cube);
+	cube.move('B', false, 1);
+	while (cube.get_value(4, 2, 2) != 38)
+		parser.Parse((L+"'"+U+"'"+L+U).c_str(), cube);
+	cube.move('B', false, 1);
+	while (cube.get_value(4, 2, 2) != 36)
+		parser.Parse((L+"'"+U+"'"+L+U).c_str(), cube);
+	cube.move('B', false, 1);
+	while (cube.get_value(4, 2, 2) != 42)
+		parser.Parse((L+"'"+U+"'"+L+U).c_str(), cube);
+	cube.move('B', false, 1);
 }

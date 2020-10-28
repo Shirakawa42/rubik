@@ -72,7 +72,7 @@ void	Cube::read_movelist(t_move *movelist)
 			}
 			if (movelist[i].nb > 2)
 			{
-				while (movelist[i].nb > 4)
+				while (movelist[i].nb >= 4)
 					movelist[i].nb -= 4;
 				if (movelist[i].nb == 3)
 				{

@@ -20,7 +20,11 @@ class Solver
 		void		set_facing(int face);
 		void		create_blue_face(Cube & cube);
 		void		create_second_line(Cube & cube);
+		void		create_cross(Cube & cube);
 		void		place_arete(Cube & cube, int i, int j, int k, int facing, int value);
 		void		place_corner(Cube & cube, int i, int j, int k, int facing, int value);
 		void		place_belge(Cube & cube, int i, int j, int k, int facing, int value, int opposite);
+		void		place_cross(Cube & cube);
+		void		place_last_corners(Cube & cube);
+		void		rotate_corners(Cube & cube);
 };
