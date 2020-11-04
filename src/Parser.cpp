@@ -15,7 +15,7 @@ static std::string	removeWrong(std::string str)
 	std::string		ret;
 	std::string		ok = "RLUDFB'2";
 
-	for (int i = 0; i < str.length(); i++)
+	for (size_t i = 0; i < str.length(); i++)
 	{
 		if (ok.find(str[i]) != std::string::npos)
 			ret += str[i];
@@ -32,7 +32,7 @@ void	Parser::Parse(char const *str, Cube & cube)
 	bool			prime;
 
 	s = removeWrong(s);
-	for (int i = 0; i < s.length();)
+	for (size_t i = 0; i < s.length();)
 	{
 		nb_rota = 1;
 		prime = false;

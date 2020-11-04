@@ -15,12 +15,12 @@ OBJ = $(addprefix $(OBJ_PATH), $(OBJ_NAME))
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	@clang++ $(INC) $(OBJ) -lm -o $(NAME)
+	@clang++ $(INC) $(OBJ) -lm -o $(NAME) -Wall -Wextra -Werror
 	@echo "$(NAME) created"
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.cpp
 	@mkdir -p $(OBJ_PATH)
-	@clang++ $(INC) -o $@ -c $<
+	@clang++ $(INC) -o $@ -c $< -Wall -Wextra -Werror
 
 clean:
 	@rm -fv $(OBJ)

@@ -361,7 +361,7 @@ static void	get_down_corner(int i, int & nj, int & nk, bool right)
 	}
 }
 
-static bool	is_on_another_corner_belge(Cube & cube, int facing, int value, int opposite, int i)
+static bool	is_on_another_corner_belge(Cube & cube, int value, int opposite, int i)
 {
 	int	j, k, v;
 
@@ -427,11 +427,11 @@ void	Solver::place_corner(Cube & cube, int i, int j, int k, int facing, int valu
 		parser.Parse((D+D+F+D+"'"+F+"'").c_str(), cube);
 }
 
-void	Solver::place_belge(Cube & cube, int i, int j, int k, int facing, int value, int opposite)
+void	Solver::place_belge(Cube & cube, int i, int facing, int value, int opposite)
 {
 	int	nj, nk, r, tj, tk;
 
-	if (is_on_another_corner_belge(cube, facing, value, opposite, i))
+	if (is_on_another_corner_belge(cube, value, opposite, i))
 	{
 		get_target_belge(i, tj, tk);
 		if (cube.get_value(i, tj, tk) == value || cube.get_value(i, tj, tk) == opposite)
@@ -502,16 +502,16 @@ void	Solver::create_second_line(Cube & cube)
 
 	cube.find_value(28, i, j, k);
 	if (!(i == 3 && j == 0 && k == 1))
-		place_belge(cube, i, j, k, 3, 28, 5);
+		place_belge(cube, i, 3, 28, 5);
 	cube.find_value(3, i, j, k);
 	if (!(i == 0 && j == 1 && k == 0))
-		place_belge(cube, i, j, k, 0, 3, 10);
+		place_belge(cube, i, 0, 3, 10);
 	cube.find_value(16, i, j, k);
 	if (!(i == 1 && j == 2 && k == 1))
-		place_belge(cube, i, j, k, 1, 16, 48);
+		place_belge(cube, i, 1, 16, 48);
 	cube.find_value(50, i, j, k);
 	if (!(i == 5 && j == 1 && k == 2))
-		place_belge(cube, i, j, k, 5, 50, 34);
+		place_belge(cube, i, 5, 50, 34);
 }
 
 static bool	is_green(int value)
@@ -563,8 +563,6 @@ static bool	is_cross(Cube & cube)
 
 void	Solver::create_cross(Cube & cube)
 {
-	int	res;
-
 	while (!is_cross(cube))
 	{
 		set_facing(is_cross_line(cube));
